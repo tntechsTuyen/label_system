@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" type="text/css" href="css/fontawesome/css/all.min.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<script type="text/javascript" src="js/jquery.js"></script>
+</head>
+<style>
+	#tab-move{
+		width: 100%;
+		height: 100%;
+		position: relative;
+	}
+</style>
+<body>
+	<div class="view-temp">
+		<div class="toolbox">
+			<p class="title-group-view">Toolbox</p>	
+			<ul>
+					
+			</ul>
+		</div>
+		<div class="img-ex">
+			<p class="name-view title-group-view">View Object<span id="name-view"></span></p>
+			<img src="img/no_image.jpg" class="img-view">
+		</div>
+	</div>
+
+	<div class="view-move">
+		<div id="tab-move" type="3" ondblclick="infoObjectInView(this)"></div>
+		
+	</div>
+
+	<div class="view-profile">
+		<div class="tree-struct-view">
+			<p class="title-group-view">Out Line</p>	
+			<ul class="outline-list-obj">
+			</ul>
+		</div>
+		<!-- 
+			is_attr: 0 attr custom of view
+			is_attr: 1 css style
+			is_attr: 2 value of view
+		-->
+		<div class="profile-object">
+			<p class="title-group-view">Profile</p>	
+			<table>
+				<tr>
+					<td colspan="2" rowspan="3"><img src="img/no_image.jpg" width="100px" height="100px"></td>
+					<td>
+						ID:
+						<input type="hidden" name="type" id="type_view">
+					</td>
+					<td><span id="id_view" style="font-weight: bold;"></span></td>
+				</tr>
+				<tr>
+					<td>Name:</td>
+					<td><input type="text" id="name_view" placeholder="Name view" is_attr="0" attr_name="name" unit=""></td>
+				</tr>
+				<tr>
+					<td>Value:</td>
+					<td><input type="text" id="value" placeholder="Value" is_attr="2" attr_name="val" unit=""></td>
+				</tr>
+				<tr>
+					<td>Font size:</td>
+					<td><input type="text" id="font_size" placeholder="Ex: 14" is_attr="1" attr_name="font-size" unit="px"></td>
+					<td>Font weight:</td>
+					<td><input type="text" id="font_weight" placeholder="Ex: 100" is_attr="1" attr_name="font-weight" unit=""></td>
+				</tr>
+				<tr>
+					<td>Width(px):</td>
+					<td><input type="number" id="width_object" placeholder="width" is_attr="1" attr_name="width" unit="px"></td>
+					<td>Height(px):</td>
+					<td><input type="number" id="height_object" placeholder="height" is_attr="1" attr_name="height" unit="px"></td>
+				</tr>
+				<tr>
+					<td>Object X:</td>
+					<td><input type="number" id="object_x" placeholder="object x" is_attr="1" attr_name="left" unit="px"></td>
+					<td>Object Y:</td>
+					<td><input type="number" id="object_y" placeholder="object y" is_attr="1" attr_name="top" unit="px"></td>
+				</tr>
+				<tr>
+					<td>Border:</td>
+					<td><input type="text" id="border" placeholder="border" is_attr="1" attr_name="border" unit="px solid"></td>
+					<td>BG:</td>
+					<td><input type="text" id="background" placeholder="#FFF" is_attr="1" attr_name="background" unit=""></td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="js/moving-obj.js"></script>
+<script type="text/javascript" src="js/objects.js"></script>
+<script>
+$(document).ready(function(){
+	var ctrlDown = false,
+		ctrlKey = 17,
+		cmdKey = 91,
+		vKey = 86,
+		cKey = 67,
+		plusRight = 187,
+		nonPlusRight = 189;
+	var a = 1;
+	$(document).keydown(function(e){
+		
+		// if(e.keyCode == ctrlKey || e.keyCode == cmdKey) ctrlDown = true;
+		switch(e.keyCode){
+			case plusRight:
+				a+=0.1;
+				break;
+			case nonPlusRight:
+				a-=0.1;
+				break;
+		}
+		showVal(a);
+	}).keyup(function(e){
+		// console.log("Down: "+e.keyCode);
+		// if(e.keyCode == ctrlKey || e.keyCode == cmdKey) ctrlDown = false;
+	});
+	initData();
+	actionView();
+});
+
+function setZoom(element, valZoom){
+	transformOrigin = [0,0];
+	element = element || instance.getContainer();
+	var p = ["webkit", "moz", "ms", "o"];
+	var s = "scale("+valZoom+")";
+	var oString = (transformOrigin[0] * 100)+"% "+(transformOrigin[1] * 100) +"%";
+	for(var i = 0; i < p.length; i++){
+		element.style[p[i] + "Transform"] = s;
+		element.style[p[i] + "TransformOrigin"] = oString;
+	}
+
+	element.style["transform"] = s;
+	element.style['transformOrigin'] = oString;
+}
+
+function showVal(a){
+	var obj = document.getElementById('tab-move');
+	// setZoom(obj, a);
+}
+
+var structView = {
+	"text":{
+		name: "text",
+		url: "img/textview.PNG",
+		ico: "fas fa-font",
+		type: 1
+	},
+	"barcode-1":{
+		name: "barcode-1",
+		url: "img/bar_code_1.PNG",
+		ico: "fas fa-barcode",
+		type: 2
+	},
+	"barcode-2":{
+		name: "barcode-2",
+		url: "img/bar_code_2.PNG",
+		ico: "fas fa-barcode",
+		type: 2
+	},
+	"qrcode":{
+		name: "qrcode",
+		url: "img/qr.PNG",
+		ico: "fas fa-qrcode",
+		type: 2
+	},
+	"line-1":{
+		name: "line-1",
+		url: "img/line-1.PNG",
+		ico: "fas fa-slash",
+		type: 3,
+		style: {
+			width: "5px",
+			height: "50px",
+			border: "0px",
+			background: "#3e3e3e",
+			radius: "0%"
+		}
+	},
+	"line-2":{
+		name: "line-2",
+		url: "img/line-2.PNG",
+		ico: "fas fa-slash",
+		type: 3,
+		style: {
+			width: "50px",
+			height: "5px",
+			border: "0px",
+			background: "#3e3e3e",
+			radius: "0%"
+		}
+	},
+	"circle":{
+		name: "circle",
+		url: "img/line-2.PNG",
+		ico: "fas fa-slash",
+		type: 3,
+		style: {
+			width: "50px",
+			height: "50px",
+			border: "1px solid #000000",
+			background: "#ffffff",
+			radius: "100%"
+		}
+	},
+	"label":{
+		name: "label",
+		url: "img/label.PNG",
+		ico: "fas fa-vector-square",
+		type: 3,
+		style: {
+			width: "50px",
+			height: "50px",
+			border: "1px",
+			background: "#fff"
+		}
+	},
+	"image":{
+		name: "Image",
+		url: "img/product-4.png",
+		ico: "fas fa-image",
+		type: 2
+	}
+}
+
+var totalView = 0;
+
+function initData(){
+	for(var key in structView){
+		var html = `<li view="text"><i class="${structView[key].ico}"></i><span>${structView[key].name}</span><i class="fas fa-plus-circle plus-view" view="${key}" type="${structView[key].type}"></i></li>`;
+		$('.toolbox ul').append(html);
+	}
+}
+
+function actionView(){
+	$(".plus-view").click(function(){
+		var view = $(this).attr('view');
+		var type = $(this).attr('type');
+		var idView = 'obj-'+totalView;
+		var nameView = "View-"+totalView;
+
+		var objView = chooseObject(view, idView);
+
+		$("#tab-move").append(objView['contentHtml']);
+		$(".outline-list-obj").append(objView['outLine']);
+		onChangeEnableView();
+		dragElement(idView);
+		totalView++;
+	});
+
+	$(".view-temp ul li").click(function(){
+		var view = $(this).attr('view');
+		var url = chooseImage(view);
+		var text = $(this).text();
+		console.log(text);
+		$("#name-view").html("("+text+")");
+		$(".img-view").attr('src', url);
+	});
+
+	$(".profile-object input").keyup(function(){
+		var isAttr = $(this).attr("is_attr");
+		var nameAttr = $(this).attr("attr_name");
+		var unit = $(this).attr("unit");
+		var tmpVal = $(this).val()+""+unit;
+		var idView = $("#id_view").html();
+		switch(isAttr*1){
+			case 0:
+				$("#"+idView).attr(nameAttr, tmpVal);
+				break;
+			case 1:
+				$("#"+idView).css(nameAttr, tmpVal);
+				break;
+			case 2:
+				$("#"+idView).attr(nameAttr, tmpVal);
+				$("#"+idView).html(tmpVal);
+				break;
+		}
+		console.log(tmpVal);
+	});
+}
+
+
+function onChangeEnableView(){	
+	$(".cb-show-obj").change(function(){
+		var checked = $(this).prop('checked');
+		var idParent = $(this).attr('id-parent');
+		var idMap = $("#"+idParent).attr('id-map');
+		if(checked == true){
+			$("#"+idMap).css("display", "block");
+		}else{
+			$("#"+idMap).css("display", "none");
+		}
+	})
+}
+
+function chooseImage(strView){
+	return structView[strView]['url'];
+}
+
+function chooseObject(strView, mId){
+	var obj = null;
+	switch(structView[strView]['type']*1){
+		case 1:
+			obj = objectTextView(mId, structView[strView]); break;
+		case 2:
+			obj = objectBarCode(mId, structView[strView]); break;
+		case 3:
+			obj = objectHtml(mId, structView[strView]); break;
+		default: obj = objectBarCode(mId, structView[strView]); break;
+	}
+	return obj;
+}
+
+</script>
+
+</html>
